@@ -5,7 +5,7 @@ from scipy.optimize import curve_fit
 
 def opentext(input, d):
     h = d - 1
-    rawdata = np.genfromtxt(input, delimiter=',')  # skip first two rows, might need to change this
+    rawdata = np.genfromtxt(input, delimiter=',')
     prenames = rawdata[h]
     names = prenames[d:]
     predata = rawdata[d:]
@@ -48,6 +48,6 @@ def fit_curve(x, y):
 def plot_fittedcurve(x, y, half, y_fit):
     plt.scatter(x, y)  # plot the x and y data
     x_pos = max(x) / 1.3
-    plt.text(x_pos, 0.5, '$K_D$ = ' + str(round(half, 2)))  # add text for Tm (which is value of estimated_x0)
+    plt.text(x_pos, 0.5, '$y_{0.5}$ = ' + str(round(half, 2)))  # add text for Tm (which is value of estimated_x0)
     plt.plot(x, y_fit, '--')  # plot fitted curve
     sns.despine()  # remove right and top axis

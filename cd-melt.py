@@ -4,7 +4,6 @@ import seaborn as sns
 from functions import *
 
 parser = argparse.ArgumentParser()
-parser.add_argument('-i', dest='filename', metavar ='Input filename', help='enter csv filename', required=True)
 parser.add_argument('-s', dest='startT', metavar="Starting temp", type=int, help="Enter starting temperature", required=True)
 parser.add_argument('-f', dest='finalT', metavar="Final temp", type=int, help="Enter final temperature", required=True)
 args = parser.parse_args()
@@ -13,8 +12,11 @@ startT = args.startT
 finalT = args.finalT
 
 #open csv file
-infile = args.filename
+infile = input('Name of CSV file: ')
+title = input('Graph title: ')
+peak = int(input('Which peak do you want to monitor? '))
 data, names = opentext(infile, 2)
+xp_name = infile.replace('.csv', '')
 
 #plot multiline
 plt.figure(1)
@@ -22,17 +24,20 @@ x = data[0]
 y = data[1:]
 plot_multiline(x, y, 'Wavelength [nm]', 'Ellipticity [mdeg]')
 plt.axhline(0, color='black', linewidth="1") #add horiz line at y=0
-plt.savefig('CDMeltFull.png', dpi=300)
+plt.title(title)
+filename = xp_name+'-CDMeltFull.png'
+plt.savefig(filename, dpi=300)
 
 
 #START NEXT PLOT
 plt.figure(2)
 
-elip = np.argmax(y[1]) #find which position in first y series is the max
-x_elip = x[elip] #find the value of x at the position calcd from above
+elip = np.where(x == peak) #find which position in x = peak
+#x_elip = x[elip] #find the value of x at the position calcd from above
+
 
 plt.xlabel('Temperature [\u00b0C]')
-plt.ylabel('Normalised Ellipiticity at '+str(x_elip)+' nm [mdeg]')
+plt.ylabel('Normalised Ellipiticity at '+str(peak)+' nm [mdeg]')
 
 #set x values as every 5 between startT and finalT
 newx = []
@@ -57,4 +62,6 @@ y_fit, melt = fit_curve(newx, normy)
 
 #plot data
 plot_fittedcurve(newx, normy, melt, y_fit)
-plt.savefig('CDMeltPeak.png', dpi=300)
+plt.title(title)
+filename = xp_name+'-CDMeltPeak.png'
+plt.savefig(filename, dpi=300)
