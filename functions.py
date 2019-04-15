@@ -51,3 +51,4 @@ def plot_fittedcurve(x, y, half, y_fit):
     plt.text(x_pos, 0.5, '$y_{0.5}$ = ' + str(round(half, 2)))  # add text for Tm (which is value of estimated_x0)
     plt.plot(x, y_fit, '--')  # plot fitted curve
     sns.despine()  # remove right and top axis
+
