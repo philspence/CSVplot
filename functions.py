@@ -33,9 +33,16 @@ def zero_correct(zero_pos, y):
         zeroed_y.append(zeroed_series)
     return np.array(zeroed_y)
 
-def plot_multiline(axes, x, y, xaxis, yaxis, title, hline, vline, color):
+def plot_multiline(axes, x, y, xaxis, yaxis, title, hline, vline, color, xmin, xmax, ymin, ymax):
     #colours
     colrs = plt.cm.brg(np.linspace(0, 0.5, len(y)))
+
+    try:
+        axes.set_xlim(float(xmin), float(xmax))
+        axes.set_ylim(float(ymin), float(ymax))
+    except Exception:
+        pass
+
     num = 0
     for i in y:  # for each row in the y array
         axes.plot(x, i, color=colrs[num], linewidth="0.7")  # plot each y series with the first color in the color array
@@ -119,20 +126,24 @@ def get_newx(self):
         self.sec_x = np.linspace(0, (len(self.sec_y) - 1), len(self.sec_y))
     return self.sec_x
 
-def find_closest(x, val):
-    num = 0
-    for i in x:
-        if (i - val) < (i - x[num]):
-            closest = x[num]
-        num += 1
-    return closest
+def find_closest(x, val, self):
+    try:
+        num = 0
+        for i in x:
+            if (i - val) < (i - x[num]):
+                closest = x[num]
+            num += 1
+        return closest
+    except Exception:
+        error_report(self, "Position in X to monitor is outside of X range")
+        return
 
 def plotsec(self):
     global c
     c = 5
     self.axes2.clear()
 
-    xval = find_closest(self.x, self.xvalue)
+    xval = find_closest(self.x, self.xvalue, self)
     self.sec_y = np.array(get_newy(self.x, self.y, xval))  # get y values from the series at a specific x
 
     if self.sec_type == 0:
@@ -231,3 +242,7 @@ def save_csv(self):
         return
     path = dialog.GetPath()
     return path
+
+def error_report(self, msg):
+    error = wx.MessageDialog(self, msg, style=wx.OK, caption="Error")
+    error.ShowModal()

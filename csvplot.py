@@ -77,14 +77,14 @@ class MainFrame(wx.Frame):
         self.horiz_line_chk = wx.CheckBox(self.panel, label="Horizontal Line (y = 0)")
         self.vert_line_chk = wx.CheckBox(self.panel, label="Vertical Line (x = 0)")
 
-        self.x_ax_limit_up = wx.TextCtrl(self.panel, value="Lower X limit")
-        self.x_ax_limit_low = wx.TextCtrl(self.panel, value="Upper X limit")
+        self.x_ax_limit_low = wx.TextCtrl(self.panel, value="Lower X limit")
+        self.x_ax_limit_up = wx.TextCtrl(self.panel, value="Upper X limit")
         hbox_XLimits = wx.BoxSizer(wx.HORIZONTAL)
         hbox_XLimits.AddMany([(self.x_ax_limit_low, 1, wx.EXPAND, 0),
                              (self.x_ax_limit_up, 1, wx.EXPAND, 0)])
 
-        self.y_ax_limit_up = wx.TextCtrl(self.panel, value="Lower Y limit")
-        self.y_ax_limit_low = wx.TextCtrl(self.panel, value="Upper Y limit")
+        self.y_ax_limit_low = wx.TextCtrl(self.panel, value="Lower Y limit")
+        self.y_ax_limit_up = wx.TextCtrl(self.panel, value="Upper Y limit")
         hbox_YLimits = wx.BoxSizer(wx.HORIZONTAL)
         hbox_YLimits.AddMany([(self.y_ax_limit_low, 1, wx.EXPAND, 0),
                              (self.y_ax_limit_up, 1, wx.EXPAND, 0)])
@@ -126,7 +126,7 @@ class MainFrame(wx.Frame):
         #hbox = CONFIRM SECOND PLOT
         hbox_ConfSecPlot = wx.BoxSizer(wx.HORIZONTAL)
         self.confirm_sec_plot = wx.CheckBox(self.panel, label="Confirm Secondary Plot")
-        self.update_grid = wx.Button(self.panel, label="Get X From Grid")
+        self.update_grid = wx.Button(self.panel, label="Update X From Grid")
         self.update_grid.Bind(wx.EVT_BUTTON, self.update_grid_press)
         hbox_ConfSecPlot.Add(self.confirm_sec_plot, 1, wx.ALIGN_LEFT, 5)
         hbox_ConfSecPlot.Add(self.update_grid, 1, wx.ALIGN_RIGHT, 5)
@@ -147,7 +147,7 @@ class MainFrame(wx.Frame):
 
         #hbox = X VALUE CHOICE
         hbox_SecXValue = wx.BoxSizer(wx.HORIZONTAL)
-        specific_x_val_txt = wx.StaticText(self.panel, label="Enter specific x value to monitor:")
+        specific_x_val_txt = wx.StaticText(self.panel, label="Position in X to call function on:")
         self.specific_x_val = wx.TextCtrl(self.panel, size=(50,25))
         hbox_SecXValue.Add(specific_x_val_txt, 0, wx.ALL, 5)
         hbox_SecXValue.Add(self.specific_x_val, 0, wx.ALL, 5)
@@ -333,7 +333,7 @@ class MainFrame(wx.Frame):
         else:
             pass
 
-        plot_multiline(self.axes1, self.x, self.y, xlabel, ylabel, title, hline, vline, color)
+        plot_multiline(self.axes1, self.x, self.y, xlabel, ylabel, title, hline, vline, color, self.x_ax_limit_low.GetValue(), self.x_ax_limit_up.GetValue(), self.y_ax_limit_low.GetValue(), self.y_ax_limit_up.GetValue())
 
         #secondary plot
 
@@ -344,7 +344,7 @@ class MainFrame(wx.Frame):
         if confirm_sec is True:
             self.sec_type = self.sec_plot_type.GetCurrentSelection()  # select type of plot
             self.xvalue = float(self.specific_x_val.GetValue())  # specific x value
-            xval = find_closest(self.x, self.xvalue)
+            xval = find_closest(self.x, self.xvalue, self)
             self.sec_y = np.array(get_newy(self.x, self.y, xval))  # get y values from the series at a specific x
             self.sec_x = np.array(get_newx(self))  # get x values from the increments
             plotsec(self)
@@ -392,23 +392,26 @@ class MainFrame(wx.Frame):
             resize_sizer(self, self.vbox_SecParams)
 
     def load_preset(self, event):
-        if self.specific_x_val.GetValue() == None:
-            print("Error")
-        self.xvalue = float(self.specific_x_val.GetValue())
-        self.confirm_sec_plot.SetValue(True)
+        try:
+            self.xvalue = float(self.specific_x_val.GetValue())
+            self.confirm_sec_plot.SetValue(True)
+        except Exception:
+            error_report(self, "Enter a value of X to be monitored in Secondary Plot Settings panel")
+            return
+
         if self.prim_plot_type.GetCurrentSelection() == 1:    #UV linear
             set_labels(self, "Wavelength [nm]", "Absorption [a.u.]", "UV Titration", 1, "[DNA]", "[DNA]/(Ea - Ef)")
             self.SecPlotChoice(self)
-        if self.prim_plot_type.GetCurrentSelection() == 2:    #UV nonlinear
+        elif self.prim_plot_type.GetCurrentSelection() == 2:    #UV nonlinear
             set_labels(self, "Wavelength [nm]", "Absorption [a.u.]", "UV Titration", 2, "[DNA]", "(Ea - Eb)/(Ef - Eb")
             self.SecPlotChoice(self)
-        if self.prim_plot_type.GetCurrentSelection() == 3:    #cd melt
-            set_labels(self, "Wavelength [nm]", "Ellipticity [a.u.]", "CD Melt", 3, "Temperature (C)", "Normalised Ellipticity at "+str(self.xvalue)[:3]+"nm")
+        elif self.prim_plot_type.GetCurrentSelection() == 3:    #cd melt
+            set_labels(self, "Wavelength [nm]", "Ellipticity [mdeg]", "CD Melt", 3, "Temperature (C)", "Normalised Ellipticity at "+str(self.xvalue)[:3]+"nm")
             self.startX.SetValue("5")
             self.endX.SetValue("95")
             self.increment.SetValue("5")
             self.SecPlotChoice(self)
-        if self.prim_plot_type.GetCurrentSelection() == 4:    #emission kd
+        elif self.prim_plot_type.GetCurrentSelection() == 4:    #emission kd
             set_labels(self, "Wavelength [nm]", "Emission Intensity [a.u.]", "Emission Intensity Titration", 3, "[DNA]", "Normalised Emission Intensity at "+str(self.xvalue)[:3]+"nm")
             self.SecPlotChoice(self)
         return
