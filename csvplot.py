@@ -279,7 +279,7 @@ class MainFrame(wx.Frame):
     # EVENTS
 
     def load_csv_press(self, event):
-        input_path, csv_filename, csv_dir = ftns.load_csv()
+        input_path, csv_filename, csv_dir = ftns.load_csv(self)
         self.input_path_txtbx.SetLabel(input_path)
         output_file = csv_filename.replace(".csv", ".png")
         output_path = os.path.join(csv_dir, output_file)
