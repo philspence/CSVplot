@@ -2,8 +2,6 @@
 
 CSVplot is a GUI, written in python, to plot multiline graphs using matplotlib and perform various secondary functions.
 
-<img src="https://i.imgur.com/oR12gK9.png">
-
 ![image of CSV plot](https://i.imgur.com/oR12gK9.png)
 
 Load CSV files in either x,y,y,... or x,y,x,y,... format, plot the multiline titrations and then load common presets:
